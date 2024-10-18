@@ -1,0 +1,33 @@
+.search-item {
+    display: flex;
+    margin-bottom: 20px;
+    padding: 10px;
+    border: 1px solid #ddd;
+    border-radius: 10px;
+    text-decoration: none; /* Hilangkan underline pada link */
+    color: inherit; /* Buat link mengikuti warna default */
+}
+.search-item img {
+    width: 150px;
+    height: 100px;
+    object-fit: cover;
+    margin-right: 20px;
+}
+.search-info h3 {
+    margin-bottom: 10px;
+    font-size: 1.5em;
+}
+.search-info p {
+    margin-bottom: 5px;
+}
+.search-item:hover {
+    background-color: #f9f9f9;
+    transition: background-color 0.3s;
+    color: inherit; /* Buat warna tetap sama saat di-hover */
+}
+.search-item:hover h3, .search-item:hover p {
+    color: inherit; /* Pertahankan warna teks saat di-hover */
+}
+.search-bar {
+    margin-bottom: 30px;
+}

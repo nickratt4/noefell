@@ -1,0 +1,44 @@
+.work-card {
+    margin-bottom: 20px;
+    cursor: pointer; /* Menambahkan cursor pointer untuk menunjukkan bahwa kartu dapat diklik */
+}
+
+.work-card img {
+    width: 120px; /* Ukuran thumbnail lebih kecil */
+    height: 120px;
+    object-fit: cover;
+}
+
+.work-info {
+    padding-left: 15px;
+}
+
+.work-card-title {
+    font-size: 16px;
+    font-weight: bold;
+    color: #333;
+    margin-bottom: 5px;
+}
+
+.chapter-info {
+    font-size: 14px;
+    color: #666;
+}
+
+.rating {
+    margin-top: 10px;
+    display: flex;
+    align-items: center;
+}
+
+.rating .star {
+    color: #ffcc00; /* Warna bintang */
+    font-size: 20px;
+}
+
+.average-rating {
+    margin-left: 10px; /* Jarak antara bintang dan label rating */
+    font-size: 14px;
+    color: #666;
+}
+
