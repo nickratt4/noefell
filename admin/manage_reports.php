@@ -47,11 +47,27 @@ if (isset($_POST['ban_user'])) {
     header('Location: manage_reports.php');
     exit;
 }
-
-// Proses penghapusan item dari laporan
+// Proses penghapusan item
 if (isset($_POST['delete_item'])) {
     $itemId = intval($_POST['item_id']);
     $itemType = $_POST['item_type']; // 'work' atau 'comment'
+
+    // Jika item adalah 'work', hapus dulu comment yang terkait
+   // Jika item adalah 'work', hapus dulu ratings yang terkait
+if ($itemType === 'work') {
+    // Hapus dulu rating yang terkait dengan work ini
+    $deleteRatingsQuery = "DELETE FROM ratings WHERE work_id = ?";
+    $deleteRatingsStmt = $conn->prepare($deleteRatingsQuery);
+    $deleteRatingsStmt->bind_param("i", $itemId);
+    $deleteRatingsStmt->execute();
+
+    // Hapus juga komentar yang terkait dengan work ini
+    $deleteCommentsQuery = "DELETE FROM comments WHERE work_id = ?";
+    $deleteCommentsStmt = $conn->prepare($deleteCommentsQuery);
+    $deleteCommentsStmt->bind_param("i", $itemId);
+    $deleteCommentsStmt->execute();
+}
+
 
     // Proses penghapusan item
     if ($itemType === 'work') {
@@ -76,6 +92,8 @@ if (isset($_POST['delete_item'])) {
     header('Location: manage_reports.php');
     exit;
 }
+
+
 ?>
 
 <!DOCTYPE html>

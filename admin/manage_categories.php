@@ -79,5 +79,8 @@ $result = $conn->query($query);
             <?php endwhile; ?>
         </ul>
     </div>
+    <script src="https://code.jquery.com/jquery-3.3.1.min.js"></script> <!-- Pastikan jQuery ini sebelum Bootstrap -->
+<script src="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/js/bootstrap.min.js"></script>
+
 </body>
 </html>

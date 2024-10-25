@@ -1,7 +1,7 @@
 <?php
 session_start();
 require '../config/database.php';
-include "../includes/navbar_admin.php";
+include"../includes/navbar_admin.php";
 
 
 
@@ -19,6 +19,7 @@ $result = $conn->query($query);
     <title>Banned Users</title>
     <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css">
 </head>
+
 <body>
     <div class="container mt-5">
         <h2>Banned Users</h2>
@@ -47,5 +48,9 @@ $result = $conn->query($query);
             <p>No banned users found.</p>
         <?php endif; ?>
     </div>
+    <script src="https://code.jquery.com/jquery-3.3.1.min.js"></script> <!-- Pastikan jQuery ini sebelum Bootstrap -->
+<script src="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/js/bootstrap.min.js"></script>
+
 </body>
 </html>
+

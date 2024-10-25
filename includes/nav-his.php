@@ -3,24 +3,25 @@ if (session_status() === PHP_SESSION_NONE) {
     session_start();
 }
 
-require '../config/database.php'; // Memperbarui path ke database
+require 'config/database.php';
 
-$user = null;
-$isAdmin = false; // Variabel untuk cek apakah user adalah admin
+// Menggunakan prefix 'noefel_' untuk variabel
+$noefel_user = null;
+$noefel_isAdmin = false; // Variabel untuk cek apakah user adalah admin
 
 if (isset($_SESSION['user_id'])) {
-    $userId = $_SESSION['user_id'];
-    $query = "SELECT * FROM Users WHERE id = ?";
-    $stmt = $conn->prepare($query);
-    $stmt->bind_param("i", $userId);
-    $stmt->execute();
-    $result = $stmt->get_result();
-    $user = $result->fetch_assoc();
-    $stmt->close();
+    $noefel_userId = $_SESSION['user_id'];
+    $noefel_query = "SELECT * FROM Users WHERE id = ?";
+    $noefel_stmt = $conn->prepare($noefel_query);
+    $noefel_stmt->bind_param("i", $noefel_userId);
+    $noefel_stmt->execute();
+    $noefel_result = $noefel_stmt->get_result();
+    $noefel_user = $noefel_result->fetch_assoc();
+    $noefel_stmt->close();
 
     // Cek apakah user adalah admin
-    if (isset($user['role']) && $user['role'] === 'admin') {
-        $isAdmin = true;
+    if (isset($noefel_user['role']) && $noefel_user['role'] === 'admin') {
+        $noefel_isAdmin = true;
     }
 }
 ?>
@@ -30,7 +31,7 @@ if (isset($_SESSION['user_id'])) {
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <link rel="stylesheet" href="../includes/style.css"> <!-- Memperbarui path ke style -->
+    <link rel="stylesheet" href="includes/style.css">
     <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css">
     <title>Noefell</title>
     <script src="https://code.jquery.com/jquery-3.3.1.slim.min.js"></script>
@@ -40,10 +41,10 @@ if (isset($_SESSION['user_id'])) {
 <body>
 
 <nav class="navbar navbar-expand-lg navbar-dark ">
-  <a class="navbar-brand" href="../index.php">Noefell</a> <!-- Memperbarui path ke index -->
+  <a class="navbar-brand" href="index.php">Noefell</a>
 
   <!-- Form Pencarian untuk layar besar -->
-  <form class="form-inline my-2 my-lg-0 d-none d-lg-flex" method="GET" action="../search.php"> <!-- Memperbarui path ke search -->
+  <form class="form-inline my-2 my-lg-0 d-none d-lg-flex" method="GET" action="search.php">
     <input class="form-control mr-sm-2" type="search" name="search" placeholder="Cari karya atau kategori..." aria-label="Search" required>
     <button class="btn btn-outline-success my-2 my-sm-0" type="submit">Cari</button>
   </form>
@@ -57,54 +58,54 @@ if (isset($_SESSION['user_id'])) {
   <div class="collapse navbar-collapse" id="navbarNav">
     <ul class="navbar-nav ml-auto">
       <li class="nav-item"> 
-        <a class="nav-link" href="../index.php">Home</a> <!-- Memperbarui path ke index -->
+        <a class="nav-link" href="index.php">Home</a>
       </li>
       <!-- Form Pencarian untuk layar kecil -->
-      <form class="form-inline my-2 my-lg-0 d-lg-none w-100" method="GET" action="../search.php"> <!-- Memperbarui path ke search -->
+      <form class="form-inline my-2 my-lg-0 d-lg-none w-100" method="GET" action="search.php">
         <input class="form-control mr-sm-2 w-75" type="search" name="search" placeholder="Cari karya atau kategori..." aria-label="Search" required>
         <button class="btn btn-outline-success my-2 my-sm-0 w-25" type="submit">Cari</button>
       </form>
       
       <!-- Jika user login, tampilkan menu user -->
-      <?php if ($user): ?>
+      <?php if ($noefel_user): ?>
         <li class="nav-item">
-          <a class="nav-link" href="../profile.php">Profile</a> <!-- Memperbarui path ke profile -->
+          <a class="nav-link" href="profile.php">Profile</a>
         </li>
         <li class="nav-item">
-          <a class="nav-link" href="../history.php">History</a> <!-- Memperbarui path ke history -->
+          <a class="nav-link" href="history.php">History</a>
         </li>
         <li class="nav-item">
-          <a class="nav-link" href="../user_works.php">My Works</a> <!-- Memperbarui path ke user_works -->
+          <a class="nav-link" href="user_works.php">My Works</a>
         </li>
         <li class="nav-item">
-          <a class="nav-link" href="../logout.php">Logout (<?php echo htmlspecialchars($user['username']); ?>)</a> <!-- Memperbarui path ke logout -->
+          <a class="nav-link" href="logout.php">Logout (<?php echo htmlspecialchars($noefel_user['username']); ?>)</a>
         </li>
         <!-- Menu Admin -->
-        <?php if ($isAdmin): ?>
+        <?php if ($noefel_isAdmin): ?>
           <li class="nav-item dropdown">
             <a class="nav-link dropdown-toggle" href="#" id="adminMenu" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
               Admin Panel
             </a>
             <div class="dropdown-menu" aria-labelledby="adminMenu">
-              <a class="dropdown-item" href="../admin/manage_reports.php">Manage Reports</a> <!-- Memperbarui path ke admin/manage_reports -->
-              <a class="dropdown-item" href="../admin/user_ban.php">List User Ban</a> <!-- Memperbarui path ke admin/user_ban -->
-              <a class="dropdown-item" href="../admin/manage_categories.php">Manage Categories</a> <!-- Memperbarui path ke admin/manage_categories -->
+              <a class="dropdown-item" href="admin/manage_reports.php">Manage Reports</a>
+              <a class="dropdown-item" href="admin/user_ban.php">List User Ban</a>
+              <a class="dropdown-item" href="admin/manage_categories.php">Manage Categories</a>
             </div>
           </li>
         <?php endif; ?> 
 
         <li class="nav-item">
-          <a class="nav-link" href="../profile.php"> <!-- Memperbarui path ke profile -->
-            <img src="../uploads/<?php echo htmlspecialchars($user['profile_picture'] ?: 'default_profile.jpg'); ?>" alt="Profile Picture" style="width:50px;height:50px;border-radius:50%;"> <!-- Memperbarui path ke uploads -->
+          <a class="nav-link" href="profile.php">
+            <img src="uploads/<?php echo htmlspecialchars($noefel_user['profile_picture'] ?: 'default_profile.jpg'); ?>" alt="Profile Picture" style="width:50px;height:50px;border-radius:50%;">
           </a>
         </li>
         
       <?php else: ?>
         <li class="nav-item">
-          <a class="nav-link" href="../login.php">Login</a> <!-- Memperbarui path ke login -->
+          <a class="nav-link" href="login.php">Login</a>
         </li>
         <li class="nav-item">
-          <a class="nav-link" href="../register.php">Register</a> <!-- Memperbarui path ke register -->
+          <a class="nav-link" href="register.php">Register</a>
         </li>
       <?php endif; ?>
     </ul>

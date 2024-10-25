@@ -73,6 +73,9 @@ if (isset($_SESSION['user_id'])) {
           <a class="nav-link" href="profile.php">Profile</a>
         </li>
         <li class="nav-item">
+          <a  class="nav-link" href="history.php">History</a>
+        </li>
+        <li class="nav-item">
           <a class="nav-link" href="user_works.php">My Works</a>
         </li>
         <li class="nav-item">

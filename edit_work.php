@@ -23,10 +23,15 @@ if (!$work) {
     exit();
 }
 
+// Ambil kategori untuk ditampilkan di dropdown
+$query = "SELECT * FROM Categories";
+$categoriesResult = $conn->query($query);
+
 // Proses form submit
 if ($_SERVER['REQUEST_METHOD'] == 'POST') {
     $title = $_POST['title'];
     $description = $_POST['description'];
+    $categoryId = $_POST['category_id']; // Ambil kategori dari form
 
     // Proses upload thumbnail
     $thumbnail = $work['thumbnail'];
@@ -37,10 +42,11 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
         $thumbnail = basename($_FILES['thumbnail']['name']);
     }
 
-    $query = "UPDATE Works SET title = ?, description = ?, thumbnail = ? WHERE id = ?";
+    // Tambahkan category_id ke dalam query SQL
+    $query = "UPDATE Works SET title = ?, description = ?, category_id = ?, thumbnail = ? WHERE id = ?";
     $stmt = $conn->prepare($query);
-    $stmt->bind_param("sssi", $title, $description, $thumbnail, $workId);
-    
+    $stmt->bind_param("ssisi", $title, $description, $categoryId, $thumbnail, $workId);
+
     if ($stmt->execute()) {
         header("Location: view_work.php?work_id=" . $workId);
         exit();
@@ -63,15 +69,29 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
     <?php include 'includes/header.php'; ?>
     <div class="container mt-4">
         <h2>Edit Work</h2>
-        <form action="edit_work.php?work_id=<?php echo $workId; ?>" method="post" enctype="multipart/form-data">
+        <form action="edit_works.php?work_id=<?php echo $workId; ?>" method="post" enctype="multipart/form-data">
             <div class="form-group">
                 <label for="title">Title</label>
                 <input type="text" class="form-control" id="title" name="title" value="<?php echo htmlspecialchars($work['title']); ?>" required>
             </div>
+
+            <div class="form-group">
+                <label for="category">Category</label>
+                <select name="category_id" id="category" class="form-control" required>
+                    <option value="">Select a category</option>
+                    <?php while ($category = $categoriesResult->fetch_assoc()): ?>
+                        <option value="<?php echo $category['id']; ?>" <?php if ($category['id'] == $work['category_id']) echo 'selected'; ?>>
+                            <?php echo htmlspecialchars($category['name']); ?>
+                        </option>
+                    <?php endwhile; ?>
+                </select>
+            </div>
+
             <div class="form-group">
                 <label for="description">Description</label>
                 <textarea class="form-control" id="description" name="description" rows="5" required><?php echo htmlspecialchars($work['description']); ?></textarea>
             </div>
+
             <div class="form-group">
                 <label for="thumbnail">Thumbnail</label>
                 <input type="file" class="form-control-file" id="thumbnail" name="thumbnail">
@@ -79,6 +99,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
                 <img src="uploads/<?php echo htmlspecialchars($work['thumbnail']); ?>" alt="Thumbnail" style="width:200px;height:200px;">
                 <?php endif; ?>
             </div>
+
             <button type="submit" class="btn btn-primary">Update Work</button>
         </form>
     </div>

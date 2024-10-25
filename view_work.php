@@ -73,6 +73,23 @@ $stmt->execute();
 $avgRatingResult = $stmt->get_result()->fetch_assoc();
 $averageRating = round($avgRatingResult['average_rating'], 2);
 $stmt->close();
+
+// Cek urutan pengurutan dari query string, default "DESC"
+$order = isset($_GET['order']) && $_GET['order'] === 'asc' ? 'ASC' : 'DESC';
+
+// Ambil chapter terkait karya ini, urutkan berdasarkan `id` sesuai dengan pilihan
+$query = "SELECT * FROM Chapters WHERE work_id = ? ORDER BY id $order";
+$stmt = $conn->prepare($query);
+$stmt->bind_param("i", $workId);
+$stmt->execute();
+$chaptersResult = $stmt->get_result();
+
+$chapters = [];
+while ($chapter = $chaptersResult->fetch_assoc()) {
+    $chapters[] = $chapter;
+}
+$totalChapters = count($chapters);
+$stmt->close();
 ?>
 
 <!DOCTYPE html>
@@ -122,7 +139,47 @@ $stmt->close();
             font-size: 18px;
             box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
         }
+
+        .chapter-sort-icon {
+            font-size: 1.2em;
+            cursor: pointer;
+        }
+
+        .chapter-sort-icon.asc::before {
+            content: "▲";
+        }
+
+        .chapter-sort-icon.desc::before {
+            content: "▼";
+        }
+         /* Gaya untuk tabel */
+         body {
+        font-family: Arial, sans-serif;
+    }
+    table {
+        width: 100%;
+        border-collapse: collapse;
+    }
+    th, td {
+        padding: 8px;
+        text-align: left;
+        border-bottom: 1px dotted #ddd;
+    }
+    th {
+        background-color: #f2f2f2;
+    }
+    a {
+        color: blue; /* Warna tautan saat belum diklik */
+        text-decoration: none;
+    }
+    a.clicked {
+        color: black; /* Warna tautan saat sudah diklik */
+    }
+    a:hover {
+        text-decoration: underline;
+    }
     </style>
+
 </head>
 <body>
     <?php include 'includes/header.php'; ?>
@@ -139,24 +196,8 @@ $stmt->close();
         <p>Average Rating: <?php echo $averageRating; ?> / 5</p>
 
         <!-- Form untuk memberikan rating dengan bintang jika login -->
-        <?php if ($isLoggedIn): ?>
-            <form id="ratingForm" action="view_work.php?work_id=<?php echo $work['id']; ?>" method="POST">
-                <div class="stars">
-                    <input type="radio" id="star5" name="rating" value="5" <?php if ($existingRating && $existingRating['rating'] == 5) echo 'checked'; ?>>
-                    <label for="star5">★</label>
-                    <input type="radio" id="star4" name="rating" value="4" <?php if ($existingRating && $existingRating['rating'] == 4) echo 'checked'; ?>>
-                    <label for="star4">★</label>
-                    <input type="radio" id="star3" name="rating" value="3" <?php if ($existingRating && $existingRating['rating'] == 3) echo 'checked'; ?>>
-                    <label for="star3">★</label>
-                    <input type="radio" id="star2" name="rating" value="2" <?php if ($existingRating && $existingRating['rating'] == 2) echo 'checked'; ?>>
-                    <label for="star2">★</label>
-                    <input type="radio" id="star1" name="rating" value="1" <?php if ($existingRating && $existingRating['rating'] == 1) echo 'checked'; ?>>
-                    <label for="star1">★</label>
-                </div>
-            </form>
-        <?php else: ?>
-            <p>Please <a href="login.php">login</a> to rate this work.</p>
-        <?php endif; ?>
+        <?php include 'includes/ratting.php' ?>
+
 
         <!-- Jika pengguna adalah penulis karya -->
         <?php if ($isAuthor): ?>
@@ -164,43 +205,46 @@ $stmt->close();
             <a href="add_chapter.php?work_id=<?php echo $work['id']; ?>" class="btn btn-success">Add Chapter</a>
         <?php endif; ?>
 
-        <h2>Chapters</h2>
-        <?php
-        // Ambil chapter terkait karya ini
-        $query = "SELECT * FROM Chapters WHERE work_id = ?";
-        $stmt = $conn->prepare($query);
-        $stmt->bind_param("i", $workId);
-        $stmt->execute();
-        $chaptersResult = $stmt->get_result();
+        <h2>
+    Chapters
+    <a href="?work_id=<?php echo $workId; ?>&order=<?php echo $order === 'ASC' ? 'desc' : 'asc'; ?>">
+        <span class="chapter-sort-icon <?php echo $order === 'ASC' ? 'asc' : 'desc'; ?>"></span>
+    </a>
+</h2>
 
-        $chapters = [];
-        while ($chapter = $chaptersResult->fetch_assoc()) {
-            $chapters[] = $chapter;
-        }
-
-        $totalChapters = count($chapters);
+<?php if ($totalChapters > 0): ?>
+    <table>
+        <tr>
+            <th>Chapter</th>
+            <th>Date</th>
+        </tr>
+        <?php 
+        // Hitung ulang counter sesuai dengan urutan pengurutan
+        $counter = $order === 'ASC' ? 1 : $totalChapters;
+        foreach ($chapters as $chapter):
+            $date = date('d/m/Y', strtotime($chapter['created_at'])); // Sesuaikan dengan nama kolom tanggal di tabel chapters
         ?>
+            <tr>
+                <td>
+                    <a href="view_chapter.php?chapter_id=<?php echo $chapter['id']; ?>" 
+                       onclick="markAsClicked(event)">
+                        <?php echo $counter . ". " . htmlspecialchars($chapter['name']); // Menambahkan nomor urut ?>
+                    </a>
+                </td>
+                <td><?php echo $date; ?></td>
+            </tr>
+        <?php 
+            // Update counter berdasarkan urutan pengurutan
+            $counter += $order === 'ASC' ? 1 : -1; 
+        endforeach; 
+        ?>
+    </table>
+<?php else: ?>
+    <p>No chapters available.</p>
+<?php endif; ?>
 
-        <?php if ($totalChapters > 0): ?>
-            <ul class="list-group">
-                <?php 
-                $counter = $totalChapters;
-                foreach ($chapters as $chapter):
-                ?>
-                    <li class="list-group-item">
-                        <span><?php echo $counter--; ?>. </span>
-                        <a href="view_chapter.php?chapter_id=<?php echo $chapter['id']; ?>" class="chapter-link">
-                            <?php echo htmlspecialchars($chapter['name']); ?>
-                        </a>
-                    </li>
-                <?php endforeach; ?>
-            </ul>
-        <?php else: ?>
-            <p>No chapters available.</p>
-        <?php endif; ?>
-    </div>
-
-    <div>
+</div>
+      <div>
         <!-- Tombol Report pada karya -->
         <button type="button" class="report-btn btn-danger" data-type="work" data-id="<?php echo $work['id']; ?>" data-user-id="<?php echo $work['author_id']; ?>">Report Work</button>
     </div>
@@ -245,35 +289,28 @@ $stmt->close();
     </script>
 
     <script>
-    // Notifikasi muncul otomatis jika ada pesan
-    <?php if ($notificationMessage): ?>
-        document.getElementById('notification').style.display = 'block';
-        setTimeout(function() {
-            document.getElementById('notification').style.display = 'none';
-        }, 1200);
-    <?php endif; ?>
+        // Tampilkan notifikasi jika ada pesan
+        <?php if (!empty($notificationMessage)): ?>
+            document.getElementById("notification").style.display = "block";
+            setTimeout(function() {
+                document.getElementById("notification").style.display = "none";
+            }, 3000);
+        <?php endif; ?>
 
-    // Kirim formulir rating saat bintang diklik
-    document.querySelectorAll('.stars input').forEach(star => {
-        star.addEventListener('change', function() {
-            document.getElementById('ratingForm').submit();
-        });
-    });
-
-    // Logika bintang hover
-    document.querySelectorAll('.stars label').forEach(star => {
-        star.addEventListener('mouseover', function () {
-            let currentStarId = this.getAttribute('for');
-            document.querySelectorAll('.stars label').forEach(s => {
-                if (s.getAttribute('for') <= currentStarId) {
-                    s.style.color = 'gold';
-                } else {
-                    s.style.color = 'gray';
-                }
+        // Submit rating secara otomatis setelah klik bintang
+        document.querySelectorAll('.stars input').forEach(input => {
+            input.addEventListener('change', function() {
+                document.getElementById('ratingForm').submit();
             });
         });
-    });
     </script>
+
+<script>
+    function markAsClicked(event) {
+        event.target.classList.add('clicked'); // Menambahkan kelas clicked saat tautan diklik
+    }
+</script>
+
 
     <?php include 'includes/footer.php'; ?>
 </body>

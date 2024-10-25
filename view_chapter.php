@@ -31,6 +31,35 @@ $stmt->close();
 
 $isAuthor = $work['author_id'] == $loggedInUserId;
 
+// **START: Tambahkan kode di sini untuk menyimpan riwayat baca**
+if ($isLoggedIn) {
+    // Cek apakah sudah ada dalam riwayat baca
+    $checkQuery = "SELECT * FROM readinghistory WHERE user_id = ? AND chapter_id = ?";
+    $checkStmt = $conn->prepare($checkQuery);
+    $checkStmt->bind_param("ii", $loggedInUserId, $chapterId);
+    $checkStmt->execute();
+    $result = $checkStmt->get_result();
+
+    if ($result->num_rows == 0) {
+        // Simpan riwayat baca baru
+        $insertQuery = "INSERT INTO readinghistory (user_id, chapter_id, read_at) VALUES (?, ?, NOW())";
+        $insertStmt = $conn->prepare($insertQuery);
+        $insertStmt->bind_param("ii", $loggedInUserId, $chapterId);
+        $insertStmt->execute();
+        $insertStmt->close();
+    } else {
+        // Perbarui waktu baca terakhir jika sudah ada
+        $updateQuery = "UPDATE readinghistory SET read_at = NOW() WHERE user_id = ? AND chapter_id = ?";
+        $updateStmt = $conn->prepare($updateQuery);
+        $updateStmt->bind_param("ii", $loggedInUserId, $chapterId);
+        $updateStmt->execute();
+        $updateStmt->close();
+    }
+    $checkStmt->close();
+}
+// **END: Kode untuk menyimpan riwayat baca ditambahkan di sini**
+
+
 // Ambil komentar terkait chapter ini
 $query = "SELECT comments.*, users.username, users.profile_picture FROM Comments 
           JOIN Users ON comments.user_id = users.id 
@@ -113,8 +142,6 @@ $stmt->close();
                                     <br>
                                     <!--Report komentar -->
 <a href="#" class="report-btn" data-type="comment" data-id="<?php echo $comment['id']; ?>" data-user-id="<?php echo $comment['user_id']; ?>">Report Comment</a>
-
-
                                 <?php endif; ?>
                             
 
@@ -122,7 +149,6 @@ $stmt->close();
                             
                         </div>
 
-                    <!-- a -->
                         <?php
                         $parentCommentId = $comment['id'];
                         $replyQuery = "SELECT comments.*, users.username, users.profile_picture FROM Comments 
@@ -132,11 +158,7 @@ $stmt->close();
                         $replyStmt->bind_param("i", $parentCommentId);
                         $replyStmt->execute();
                         $repliesResult = $replyStmt->get_result();
-
-
                         ?>
-
-
 
                         <?php if ($repliesResult->num_rows > 0): ?>
                             <ul class="list-group mt-3">
@@ -157,8 +179,6 @@ $stmt->close();
                                     </li>
                                 <?php endwhile; ?>
                             </ul>
-
-
                         <?php endif; ?>
                         <?php $replyStmt->close(); ?>
 
@@ -171,9 +191,8 @@ $stmt->close();
                                     <div class="form-group">
                                         <textarea name="content" class="form-control" rows="3" placeholder="Write your reply here..." required></textarea>
                                     </div>
-                                    <button type="submit" class="btn btn-primary">Submit</button>
+                                    <button type="submit" class="btn btn-primary">Submit Reply</button>
                                 </form>
-                                
                             </div>
                         <?php endif; ?>
                     </li>
@@ -185,47 +204,16 @@ $stmt->close();
     </div>
 
     <?php include 'includes/footer.php'; ?>
-    
+
     <script>
+        // Script untuk toggle form reply
         document.querySelectorAll('.reply-button').forEach(button => {
             button.addEventListener('click', () => {
                 const commentId = button.getAttribute('data-comment-id');
                 const replyForm = document.getElementById(`reply-form-${commentId}`);
                 replyForm.style.display = replyForm.style.display === 'none' ? 'block' : 'none';
-                replyForm.querySelector('textarea').focus();
             });
         });
     </script>
-
-<script>
-document.querySelectorAll('.report-btn').forEach(button => {
-    button.addEventListener('click', function (e) {
-        e.preventDefault();
-        const type = this.getAttribute('data-type'); 
-        const reportedId = this.getAttribute('data-id');
-        const reportedUserId = this.getAttribute('data-user-id');
-        const reason = prompt("Enter the reason for reporting:");
-
-        if (reason) {
-            fetch('report.php', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json'
-                },
-                body: JSON.stringify({
-                    type: type,
-                    reportedId: reportedId,
-                    reportedUserId: reportedUserId,
-                    reason: reason
-                })
-            })
-            .then(response => response.json())
-            .then(data => {
-                alert(data.message);
-            });
-        }
-    });
-});
-</script>
 </body>
 </html>
