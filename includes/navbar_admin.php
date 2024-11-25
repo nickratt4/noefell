@@ -1,9 +1,8 @@
 <?php
+require '../config/database.php'; // Memperbarui path ke database
 if (session_status() === PHP_SESSION_NONE) {
     session_start();
 }
-
-require '../config/database.php'; // Memperbarui path ke database
 
 $user = null;
 $isAdmin = false; // Variabel untuk cek apakah user adalah admin
@@ -28,14 +27,11 @@ if (isset($_SESSION['user_id'])) {
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
+    <meta charset="UTF-8">    
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <link rel="stylesheet" href="../includes/style.css"> <!-- Memperbarui path ke style -->
     <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css">
     <title>Noefell</title>
-    <script src="https://code.jquery.com/jquery-3.3.1.slim.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.9.3/dist/umd/popper.min.js"></script>
-    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/js/bootstrap.min.js"></script>
 </head>
 <body>
 
@@ -76,9 +72,12 @@ if (isset($_SESSION['user_id'])) {
         <li class="nav-item">
           <a class="nav-link" href="../user_works.php">My Works</a> <!-- Memperbarui path ke user_works -->
         </li>
+        
+        <!-- Logout Trigger -->
         <li class="nav-item">
-          <a class="nav-link" href="../logout.php">Logout (<?php echo htmlspecialchars($user['username']); ?>)</a> <!-- Memperbarui path ke logout -->
+          <a href="#" id="logout-link" class="nav-link">Logout (<?php echo htmlspecialchars($user['username']); ?>)</a>
         </li>
+
         <!-- Menu Admin -->
         <?php if ($isAdmin): ?>
           <li class="nav-item dropdown">
@@ -91,7 +90,7 @@ if (isset($_SESSION['user_id'])) {
               <a class="dropdown-item" href="../admin/manage_categories.php">Manage Categories</a> <!-- Memperbarui path ke admin/manage_categories -->
             </div>
           </li>
-        <?php endif; ?> 
+        <?php endif; ?>
 
         <li class="nav-item">
           <a class="nav-link" href="../profile.php"> <!-- Memperbarui path ke profile -->
@@ -111,6 +110,33 @@ if (isset($_SESSION['user_id'])) {
   </div>
 </nav>
 
+<!-- Include Modal Logout -->
+<?php include '../includes/logout_modal.php'; ?>
+
+<script>
+    // Get the modal and logout link
+    const modal = document.getElementById('logoutModal');
+    const logoutLink = document.getElementById('logout-link');
+
+    // Show modal on logout link click
+    logoutLink.addEventListener('click', function (e) {
+        e.preventDefault(); // Prevent default link behavior
+        modal.style.display = 'block'; // Show modal
+    });
+
+    // Confirm logout
+    function confirmLogout() {
+        window.location.href = '../logout.php'; // Redirect to logout script
+    }
+
+    // Cancel logout
+    function hideLogoutModal() {
+        modal.style.display = 'none'; // Hide modal
+    }
+</script>
+
 <script src="https://code.jquery.com/jquery-3.3.1.slim.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.7/umd/popper.min.js"></script>
 <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/js/bootstrap.min.js"></script>
+</body>
+</html>

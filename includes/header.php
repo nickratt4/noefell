@@ -38,8 +38,15 @@ if (isset($_SESSION['user_id'])) {
     <script src="https://code.jquery.com/jquery-3.3.1.slim.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.9.3/dist/umd/popper.min.js"></script>
     <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/js/bootstrap.min.js"></script>
+
+
 </head>
 <body>
+<?php if (isset($_GET['message']) && $_GET['message'] === 'logout_success'): ?>
+  <div class="alert alert-success" role="alert">
+    You have successfully logged out.
+  </div>
+<?php endif; ?>
 
 <nav class="navbar navbar-expand-lg navbar-dark ">
   <a class="navbar-brand" href="index.php">Noefell</a>
@@ -78,9 +85,11 @@ if (isset($_SESSION['user_id'])) {
         <li class="nav-item">
           <a class="nav-link" href="user_works.php">My Works</a>
         </li>
-        <li class="nav-item">
-          <a class="nav-link" href="logout.php">Logout (<?php echo htmlspecialchars($user['username']); ?>)</a>
-        </li>
+        <a href="#" id="logout-link" class="nav-link">Logout (<?php echo htmlspecialchars($user['username']); ?>)</a>
+
+
+
+
    <!-- Menu Admin -->
    <?php if ($isAdmin): ?>
           <li class="nav-item dropdown">
@@ -113,6 +122,12 @@ if (isset($_SESSION['user_id'])) {
     </ul>
   </div>
 </nav>
+<div id="logoutModal" class="modal" style="display:none;">
+  <h2>Noefell</h2>
+  <p>Are you sure you want to logout?</p>
+  <button onclick="confirmLogout()">Logout</button>
+  <button class="cancel" onclick="hideLogoutModal()">Cancel</button>
+</div>
 
 
 

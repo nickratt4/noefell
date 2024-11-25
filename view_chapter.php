@@ -31,7 +31,6 @@ $stmt->close();
 
 $isAuthor = $work['author_id'] == $loggedInUserId;
 
-// **START: Tambahkan kode di sini untuk menyimpan riwayat baca**
 if ($isLoggedIn) {
     // Cek apakah sudah ada dalam riwayat baca
     $checkQuery = "SELECT * FROM readinghistory WHERE user_id = ? AND chapter_id = ?";
@@ -125,6 +124,7 @@ $stmt->close();
             <p><a href="login.php">Login</a> to add a comment.</p>
         <?php endif; ?>
 
+        menampilkan komentar
         <h3>Comments</h3>
         <?php if ($commentsResult->num_rows > 0): ?>
             <ul class="list-group mb-4">
@@ -150,6 +150,7 @@ $stmt->close();
                         </div>
 
                         <?php
+                        //meng inputkan komen ke database
                         $parentCommentId = $comment['id'];
                         $replyQuery = "SELECT comments.*, users.username, users.profile_picture FROM Comments 
                                        JOIN Users ON comments.user_id = users.id 
@@ -175,6 +176,8 @@ $stmt->close();
                                         
                                         <?php if ($isLoggedIn): ?>
                                     <button class="btn btn-secondary btn-sm mt-2 reply-button" data-comment-id="<?php echo $comment['id']; ?>">Reply</button>
+                                    <a href="#" class="report-btn" data-type="comment" data-id="<?php echo $comment['id']; ?>" data-user-id="<?php echo $comment['user_id']; ?>">Report Comment</a>
+
                                 <?php endif; ?>
                                     </li>
                                 <?php endwhile; ?>
@@ -182,18 +185,23 @@ $stmt->close();
                         <?php endif; ?>
                         <?php $replyStmt->close(); ?>
 
-                        <!-- Reply form -->
+                        <!-- Reply  -->
                         <?php if ($isLoggedIn): ?>
                             <div class="reply-form mt-3" id="reply-form-<?php echo $comment['id']; ?>" style="display: none;">
+
                                 <form action="add_comment.php" method="post">
                                     <input type="hidden" name="chapter_id" value="<?php echo $chapterId; ?>">
                                     <input type="hidden" name="parent_comment_id" value="<?php echo $comment['id']; ?>">
+
                                     <div class="form-group">
                                         <textarea name="content" class="form-control" rows="3" placeholder="Write your reply here..." required></textarea>
                                     </div>
                                     <button type="submit" class="btn btn-primary">Submit Reply</button>
+
                                 </form>
+
                             </div>
+
                         <?php endif; ?>
                     </li>
                 <?php endwhile; ?>
@@ -215,5 +223,37 @@ $stmt->close();
             });
         });
     </script>
+<script>
+document.querySelectorAll('.report-btn').forEach(button => {
+    button.addEventListener('click', function (e) {
+        e.preventDefault();
+        const type = this.getAttribute('data-type'); // work or comment
+        const reportedId = this.getAttribute('data-id');
+        const reportedUserId = this.getAttribute('data-user-id');
+        const reason = prompt("Enter the reason for reporting:");
+
+        if (reason) {
+            fetch('report.php', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({
+                    type: type,
+                    reportedId: reportedId,
+                    reportedUserId: reportedUserId,
+                    reason: reason
+                })
+            })
+            .then(response => response.json())
+            .then(data => {
+                alert(data.message);
+            });
+        }
+    });
+});
+</script>
+
+    
 </body>
 </html>

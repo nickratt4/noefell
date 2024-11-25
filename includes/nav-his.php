@@ -77,9 +77,11 @@ if (isset($_SESSION['user_id'])) {
         <li class="nav-item">
           <a class="nav-link" href="user_works.php">My Works</a>
         </li>
+        <!-- Tombol Logout dengan konfirmasi -->
         <li class="nav-item">
-          <a class="nav-link" href="logout.php">Logout (<?php echo htmlspecialchars($noefel_user['username']); ?>)</a>
+          <a class="nav-link" href="#" id="logout-link">Logout (<?php echo htmlspecialchars($noefel_user['username']); ?>)</a>
         </li>
+
         <!-- Menu Admin -->
         <?php if ($noefel_isAdmin): ?>
           <li class="nav-item dropdown">
@@ -112,6 +114,38 @@ if (isset($_SESSION['user_id'])) {
   </div>
 </nav>
 
-<script src="https://code.jquery.com/jquery-3.3.1.slim.min.js"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.7/umd/popper.min.js"></script>
-<script src="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/js/bootstrap.min.js"></script>
+<?php include 'logout_modal.php'; ?>
+
+
+<!-- Modal Logout -->
+<div class="modal" id="logoutModal">
+    <h2>Logout Confirmation</h2>
+    <p>Are you sure you want to logout?</p>
+    <button class="confirm" onclick="confirmLogout()">Logout</button>
+    <button class="cancel" onclick="cancelLogout()">Cancel</button>
+</div>
+
+<script>
+    // Get modal and logout link
+    const modal = document.getElementById('logoutModal');
+    const logoutLink = document.getElementById('logout-link');
+
+    // Show modal on logout link click
+    logoutLink.addEventListener('click', function (e) {
+        e.preventDefault(); // Prevent default link behavior
+        modal.style.display = 'block'; // Show the modal
+    });
+
+    // Confirm logout
+    function confirmLogout() {
+        window.location.href = 'logout.php'; // Redirect to logout script
+    }
+
+    // Cancel logout
+    function cancelLogout() {
+        modal.style.display = 'none'; // Hide the modal
+    }
+</script>
+
+</body>
+</html>

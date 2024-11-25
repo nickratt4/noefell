@@ -62,79 +62,7 @@ $result = $stmt->get_result();
     <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css">
     <title>History</title>
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css" rel="stylesheet" />
-    <style>
-        body {
-            font-family: Arial, sans-serif;
-            background-color: #f5f5f5;
-            margin: 0;
-            padding: 0;
-        }
-        .container {
-            width: 80%;
-            margin: 0 auto;
-            padding: 20px;
-        }
-        h1 {
-            text-align: center;
-            font-size: 24px;
-            margin-bottom: 20px;
-        }
-        .card {
-            background-color: #fff;
-            border: 1px solid #ddd;
-            border-radius: 5px;
-            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-            margin-bottom: 20px;
-            padding: 15px;
-            width: 30%;
-            display: inline-block;
-            vertical-align: top;
-            margin-right: 1.5%;
-        }
-        .card img {
-            width: 100%;
-            border-radius: 5px;
-        }
-        .card h2 {
-            font-size: 18px;
-            margin: 10px 0;
-        }
-        .card p {
-            font-size: 14px;
-            color: #555;
-            margin: 5px 0;
-        }
-        .progress-bar {
-            background-color: #e0e0e0;
-            border-radius: 5px;
-            overflow: hidden;
-            margin: 10px 0;
-        }
-        .progress-bar div {
-            height: 5px;
-            background-color: #007bff;
-        }
-        .progress-text {
-            font-size: 14px;
-            color: #555;
-            background-color: #f5f5f5;
-            padding: 5px;
-            border-radius: 5px;
-            text-align: center;
-        }
-        @media (max-width: 768px) {
-            .card {
-                width: 45%;
-                margin-right: 5%;
-            }
-        }
-        @media (max-width: 480px) {
-            .card {
-                width: 100%;
-                margin-right: 0;
-            }
-        }
-    </style>
+    <link rel="stylesheet" href="includes/his-style.css">
 </head>
 <body>
 
@@ -144,11 +72,12 @@ $result = $stmt->get_result();
     <h1>History</h1>
     <div class="row">
         <?php if ($result->num_rows > 0): ?>
+            <?php $chapterNumber = 1; // Inisialisasi nomor chapter ?>
             <?php while ($row = $result->fetch_assoc()): ?>
                 <div class="card">
                     <img class="card-img-top" src="uploads/<?php echo htmlspecialchars($row['thumbnail']); ?>" alt="Work Thumbnail">
                     <h2><?php echo htmlspecialchars($row['title']); ?></h2>
-                    <p>Chapter <?php echo htmlspecialchars($row['chapter_name']); ?></p>
+                    <p>Chapter <?php echo $chapterNumber++; ?>: <?php echo htmlspecialchars($row['chapter_name']); ?></p>
 
                     <a href="view_work.php?chapter_id=<?php echo $row['chapter_id']; ?>&work_id=<?php echo $row['work_id']; ?>" class="btn btn-primary">Lanjutkan Membaca</a>
                 </div>
@@ -167,4 +96,3 @@ $result = $stmt->get_result();
 
 </body>
 </html>
-
